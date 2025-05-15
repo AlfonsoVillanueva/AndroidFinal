@@ -85,8 +85,7 @@ class PrimerFragment : Fragment() {
                         packageName = app.packageName,
                         icon = app.loadIcon(pm),
                         versionName = packageInfo.versionName ?: "N/A",
-                        installDate = dateFormat.format(Date(packageInfo.firstInstallTime)),
-                        isSystemApp = (app.flags and ApplicationInfo.FLAG_SYSTEM) != 0
+                        installDate = dateFormat.format(Date(packageInfo.firstInstallTime))
                     )
                 } catch (e: Exception) {
                     null
@@ -135,8 +134,7 @@ class PrimerFragment : Fragment() {
         val packageName: String,
         val icon: Drawable,
         val versionName: String,
-        val installDate: String,
-        val isSystemApp: Boolean
+        val installDate: String
     )
 
     inner class AppsAdapter(
@@ -158,13 +156,12 @@ class PrimerFragment : Fragment() {
                 appVersion.text = "Versión: ${app.versionName}"
                 installDate.text = "Instalado: ${app.installDate}"
 
-                // Resaltar apps del sistema
-                if (app.isSystemApp) {
-                    appName.setTextColor(Color.BLUE)
-                    appName.text = "${app.name} (Sistema)"
-                } else {
-                    appName.setTextColor(Color.BLACK)
-                }
+                // Configurar todos los textos en negro
+                val textColor = Color.BLACK
+                appName.setTextColor(textColor)
+                packageName.setTextColor(textColor)
+                appVersion.setTextColor(textColor)
+                installDate.setTextColor(textColor)
 
                 itemView.setOnClickListener { onItemClick(app) }
             }
