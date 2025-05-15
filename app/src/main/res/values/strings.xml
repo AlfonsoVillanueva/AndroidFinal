@@ -2,4 +2,5 @@
     <string name="app_name">ProyectoFinal</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="app_icon_desc">Icono de la aplicación</string>
 </resources>

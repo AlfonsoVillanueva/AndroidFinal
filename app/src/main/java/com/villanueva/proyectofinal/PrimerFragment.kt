@@ -1,59 +1,190 @@
 package com.villanueva.proyectofinal
 
+import android.content.Intent
+import android.content.pm.ApplicationInfo
+import android.content.pm.PackageInfo
+import android.content.pm.PackageManager
+import android.graphics.Color
+import android.graphics.drawable.Drawable
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
+import android.widget.TextView
+import android.widget.Toast
+import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
-
-/**
- * A simple [Fragment] subclass.
- * Use the [PrimerFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
 class PrimerFragment : Fragment() {
-    // TODO: Rename and change types of parameters
-    private var param1: String? = null
-    private var param2: String? = null
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
-        }
-    }
+    private lateinit var recyclerView: RecyclerView
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
+        inflater: LayoutInflater,
+        container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        // Inflate the layout for this fragment
+    ): View {
         return inflater.inflate(R.layout.fragment_primer, container, false)
     }
 
-    companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
-         * @return A new instance of fragment PrimerFragment.
-         */
-        // TODO: Rename and change types and number of parameters
-        @JvmStatic
-        fun newInstance(param1: String, param2: String) =
-            PrimerFragment().apply {
-                arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        recyclerView = view.findViewById(R.id.appsRecyclerView)
+        setupRecyclerView()
+    }
+
+    private fun setupRecyclerView() {
+        recyclerView.layoutManager = LinearLayoutManager(requireContext())
+        loadInstalledApps()
+    }
+
+    private fun loadInstalledApps() {
+        val appsList = getInstalledApps()
+
+        if (appsList.isEmpty()) {
+            showEmptyState()
+        } else {
+            recyclerView.adapter = AppsAdapter(appsList) { app ->
+                launchAppOrShowDetails(app)
+            }
+        }
+    }
+
+    private fun getInstalledApps(): List<AppInfo> {
+        val pm = requireContext().packageManager
+        val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+
+        // Lista de paquetes de apps comunes que siempre queremos incluir
+        val commonSystemApps = setOf(
+            "com.android.vending",       // Play Store
+            "com.google.android.gm",     // Gmail
+            "com.google.android.youtube", // YouTube
+            "com.google.android.apps.maps", // Maps
+            "com.android.chrome"         // Chrome
+        )
+
+        return pm.getInstalledApplications(PackageManager.MATCH_ALL)
+            .asSequence()
+            .filter { app ->
+                val isUserApp = (app.flags and ApplicationInfo.FLAG_SYSTEM) == 0
+                val isCommonSystemApp = app.packageName in commonSystemApps
+                val hasLauncherIntent = hasLauncherIntent(pm, app.packageName)
+
+                (isUserApp && hasLauncherIntent) || isCommonSystemApp
+            }
+            .mapNotNull { app ->
+                try {
+                    val packageInfo = pm.getPackageInfo(app.packageName, 0)
+                    AppInfo(
+                        name = app.loadLabel(pm).toString(),
+                        packageName = app.packageName,
+                        icon = app.loadIcon(pm),
+                        versionName = packageInfo.versionName ?: "N/A",
+                        installDate = dateFormat.format(Date(packageInfo.firstInstallTime)),
+                        isSystemApp = (app.flags and ApplicationInfo.FLAG_SYSTEM) != 0
+                    )
+                } catch (e: Exception) {
+                    null
                 }
             }
+            .sortedBy { it.name.lowercase() }
+            .toList()
+    }
+
+    private fun hasLauncherIntent(pm: PackageManager, packageName: String): Boolean {
+        val launchIntent = pm.getLaunchIntentForPackage(packageName)
+        return launchIntent != null
+    }
+
+    private fun showEmptyState() {
+        Toast.makeText(
+            requireContext(),
+            "No se encontraron aplicaciones instaladas",
+            Toast.LENGTH_LONG
+        ).show()
+    }
+
+    private fun launchAppOrShowDetails(app: AppInfo) {
+        try {
+            val launchIntent = requireContext().packageManager.getLaunchIntentForPackage(app.packageName)
+            if (launchIntent != null) {
+                startActivity(launchIntent)
+            } else {
+                showAppDetails(app)
+            }
+        } catch (e: Exception) {
+            showAppDetails(app)
+        }
+    }
+
+    private fun showAppDetails(app: AppInfo) {
+        Toast.makeText(
+            requireContext(),
+            "${app.name}\nPaquete: ${app.packageName}\nVersión: ${app.versionName}",
+            Toast.LENGTH_LONG
+        ).show()
+    }
+
+    data class AppInfo(
+        val name: String,
+        val packageName: String,
+        val icon: Drawable,
+        val versionName: String,
+        val installDate: String,
+        val isSystemApp: Boolean
+    )
+
+    inner class AppsAdapter(
+        private val apps: List<AppInfo>,
+        private val onItemClick: (AppInfo) -> Unit
+    ) : RecyclerView.Adapter<AppsAdapter.AppViewHolder>() {
+
+        inner class AppViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+            private val appIcon: ImageView = itemView.findViewById(R.id.appIcon)
+            private val appName: TextView = itemView.findViewById(R.id.appName)
+            private val packageName: TextView = itemView.findViewById(R.id.packageName)
+            private val appVersion: TextView = itemView.findViewById(R.id.appVersion)
+            private val installDate: TextView = itemView.findViewById(R.id.installDate)
+
+            fun bind(app: AppInfo) {
+                appIcon.setImageDrawable(app.icon)
+                appName.text = app.name
+                packageName.text = app.packageName
+                appVersion.text = "Versión: ${app.versionName}"
+                installDate.text = "Instalado: ${app.installDate}"
+
+                // Resaltar apps del sistema
+                if (app.isSystemApp) {
+                    appName.setTextColor(Color.BLUE)
+                    appName.text = "${app.name} (Sistema)"
+                } else {
+                    appName.setTextColor(Color.BLACK)
+                }
+
+                itemView.setOnClickListener { onItemClick(app) }
+            }
+        }
+
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AppViewHolder {
+            val view = LayoutInflater.from(parent.context)
+                .inflate(R.layout.item_app, parent, false)
+            return AppViewHolder(view)
+        }
+
+        override fun onBindViewHolder(holder: AppViewHolder, position: Int) {
+            holder.bind(apps[position])
+        }
+
+        override fun getItemCount(): Int = apps.size
+    }
+
+    companion object {
+        @JvmStatic
+        fun newInstance() = PrimerFragment()
     }
 }
