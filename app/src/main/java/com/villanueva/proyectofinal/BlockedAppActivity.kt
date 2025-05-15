@@ -9,10 +9,6 @@ class BlockedAppActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_blocked_app)
 
-        val closeButton = findViewById<Button>(R.id.closeButton)
-        closeButton.setOnClickListener {
-            finishAffinity()
-        }
     }
 
 
