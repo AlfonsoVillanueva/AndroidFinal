@@ -1,8 +1,9 @@
 package com.villanueva.proyectofinal
 
+import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.content.pm.ApplicationInfo
-import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.graphics.drawable.Drawable
@@ -13,6 +14,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.widget.SwitchCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -23,6 +25,9 @@ import java.util.Locale
 class PrimerFragment : Fragment() {
 
     private lateinit var recyclerView: RecyclerView
+    private lateinit var preferences: SharedPreferences
+    private val PREFS_NAME = "AppSelectionPrefs"
+    private val SELECTED_APPS_KEY = "selectedApps"
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -35,6 +40,7 @@ class PrimerFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         recyclerView = view.findViewById(R.id.appsRecyclerView)
+        preferences = requireContext().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         setupRecyclerView()
     }
 
@@ -49,9 +55,11 @@ class PrimerFragment : Fragment() {
         if (appsList.isEmpty()) {
             showEmptyState()
         } else {
-            recyclerView.adapter = AppsAdapter(appsList) { app ->
-                launchAppOrShowDetails(app)
-            }
+            recyclerView.adapter = AppsAdapter(
+                appsList,
+                { app -> launchAppOrShowDetails(app) },
+                { packageName, isSelected -> saveAppSelection(packageName, isSelected) }
+            )
         }
     }
 
@@ -67,6 +75,9 @@ class PrimerFragment : Fragment() {
             "com.google.android.apps.maps", // Maps
             "com.android.chrome"         // Chrome
         )
+
+        // Obtener las apps seleccionadas previamente
+        val selectedApps = getSelectedApps()
 
         return pm.getInstalledApplications(PackageManager.MATCH_ALL)
             .asSequence()
@@ -85,7 +96,8 @@ class PrimerFragment : Fragment() {
                         packageName = app.packageName,
                         icon = app.loadIcon(pm),
                         versionName = packageInfo.versionName ?: "N/A",
-                        installDate = dateFormat.format(Date(packageInfo.firstInstallTime))
+                        installDate = dateFormat.format(Date(packageInfo.firstInstallTime)),
+                        isSelected = selectedApps.contains(app.packageName)
                     )
                 } catch (e: Exception) {
                     null
@@ -129,17 +141,45 @@ class PrimerFragment : Fragment() {
         ).show()
     }
 
+    // Guardar la selección de una app
+    private fun saveAppSelection(packageName: String, isSelected: Boolean) {
+        val selectedApps = getSelectedApps().toMutableSet()
+
+        if (isSelected) {
+            selectedApps.add(packageName)
+        } else {
+            selectedApps.remove(packageName)
+        }
+
+        preferences.edit().putStringSet(SELECTED_APPS_KEY, selectedApps).apply()
+
+        // Notificar al usuario sobre el cambio (opcional)
+        val status = if (isSelected) "activada" else "desactivada"
+        Toast.makeText(
+            requireContext(),
+            "Aplicación $status",
+            Toast.LENGTH_SHORT
+        ).show()
+    }
+
+    // Obtener la lista de apps seleccionadas
+    private fun getSelectedApps(): Set<String> {
+        return preferences.getStringSet(SELECTED_APPS_KEY, setOf()) ?: setOf()
+    }
+
     data class AppInfo(
         val name: String,
         val packageName: String,
         val icon: Drawable,
         val versionName: String,
-        val installDate: String
+        val installDate: String,
+        val isSelected: Boolean = false
     )
 
     inner class AppsAdapter(
         private val apps: List<AppInfo>,
-        private val onItemClick: (AppInfo) -> Unit
+        private val onItemClick: (AppInfo) -> Unit,
+        private val onSwitchChanged: (String, Boolean) -> Unit
     ) : RecyclerView.Adapter<AppsAdapter.AppViewHolder>() {
 
         inner class AppViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -148,6 +188,7 @@ class PrimerFragment : Fragment() {
             private val packageName: TextView = itemView.findViewById(R.id.packageName)
             private val appVersion: TextView = itemView.findViewById(R.id.appVersion)
             private val installDate: TextView = itemView.findViewById(R.id.installDate)
+            private val appSwitch: SwitchCompat = itemView.findViewById(R.id.appSwitch)
 
             fun bind(app: AppInfo) {
                 appIcon.setImageDrawable(app.icon)
@@ -163,7 +204,16 @@ class PrimerFragment : Fragment() {
                 appVersion.setTextColor(textColor)
                 installDate.setTextColor(textColor)
 
+                // Configurar el estado del switch (sin activar listener)
+                appSwitch.isChecked = app.isSelected
+
+                // Configurar los listeners
                 itemView.setOnClickListener { onItemClick(app) }
+
+                // Listener para el switch
+                appSwitch.setOnCheckedChangeListener { _, isChecked ->
+                    onSwitchChanged(app.packageName, isChecked)
+                }
             }
         }
 
