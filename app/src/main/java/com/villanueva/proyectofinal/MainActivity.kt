@@ -2,6 +2,7 @@ package com.villanueva.proyectofinal
 
 import android.os.Bundle
 import android.view.MenuItem
+import android.widget.Button
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
@@ -9,6 +10,8 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.commit
 import androidx.fragment.app.replace
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import android.content.Intent
+import android.provider.Settings
 
 class MainActivity : AppCompatActivity() {
 
@@ -52,6 +55,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_main)
+
 
         navegation = findViewById(R.id.navMenu)
         navegation.setOnNavigationItemSelectedListener(mOnNavMenu)

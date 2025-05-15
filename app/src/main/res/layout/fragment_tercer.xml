@@ -5,6 +5,15 @@
     android:layout_height="match_parent"
     android:background="@color/blue"
     tools:context=".TercerFragment">
+    <Button
+        android:id="@+id/btnAccesibilidad"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Activar accesibilidad"
+        android:layout_gravity="top|end"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+    />
 
     <TextView
         android:layout_width="wrap_content"
