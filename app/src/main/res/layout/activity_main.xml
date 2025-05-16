@@ -21,7 +21,7 @@
         android:layout_height="wrap_content"
         app:menu="@menu/navegation_menu"
         android:layout_gravity="bottom"
-        android:background="@color/blue_menu"
+        android:background="@color/purple"
         app:itemIconTint="@color/white"
         app:itemTextColor="@color/white"
 

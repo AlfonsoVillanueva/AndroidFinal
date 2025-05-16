@@ -4,21 +4,21 @@
     <item
         android:id="@+id/itemFrament1"
         android:icon="@drawable/ic_fragment"
-        android:title="Fragment 1"
+        android:title="Block Apps"
 
         />
 
     <item
         android:id="@+id/itemFrament2"
         android:icon="@drawable/ic_fragment"
-        android:title="Fragment 2"
+        android:title="Liberar Apps"
 
         />
 
     <item
         android:id="@+id/itemFrament3"
         android:icon="@drawable/ic_fragment"
-        android:title="Fragment 3"
+        android:title="Stats"
 
         />
 </menu>

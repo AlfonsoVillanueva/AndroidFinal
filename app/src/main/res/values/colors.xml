@@ -8,6 +8,7 @@
     <color name="green">#4CAF50</color> <!-- Verde -->
     <color name="red">#F44336</color>   <!-- Rojo -->
     <color name="gray_900">#212121</color>
+    <color name="purple">#6D30D9</color>
 
 
 </resources>

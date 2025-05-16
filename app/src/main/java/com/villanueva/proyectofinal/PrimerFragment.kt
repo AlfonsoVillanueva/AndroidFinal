@@ -57,7 +57,7 @@ class PrimerFragment : Fragment() {
         } else {
             recyclerView.adapter = AppsAdapter(
                 appsList,
-                { app -> launchAppOrShowDetails(app) },
+                { /* Ya no utilizamos la función de clic para abrir la app */ },
                 { packageName, isSelected -> saveAppSelection(packageName, isSelected) }
             )
         }
@@ -66,6 +66,9 @@ class PrimerFragment : Fragment() {
     private fun getInstalledApps(): List<AppInfo> {
         val pm = requireContext().packageManager
         val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+
+        // Obtener el nombre de paquete de tu propia aplicación
+        val ownPackageName = requireContext().packageName
 
         // Lista de paquetes de apps comunes que siempre queremos incluir
         val commonSystemApps = setOf(
@@ -85,8 +88,12 @@ class PrimerFragment : Fragment() {
                 val isUserApp = (app.flags and ApplicationInfo.FLAG_SYSTEM) == 0
                 val isCommonSystemApp = app.packageName in commonSystemApps
                 val hasLauncherIntent = hasLauncherIntent(pm, app.packageName)
+                val isNotOwnApp = app.packageName != ownPackageName  // Filtrar nuestra propia app
 
-                (isUserApp && hasLauncherIntent) || isCommonSystemApp
+                // Una app se muestra si:
+                // - Es app de usuario con intent de lanzamiento Y no es nuestra propia app
+                // - O es una app común del sistema
+                ((isUserApp && hasLauncherIntent) && isNotOwnApp) || isCommonSystemApp
             }
             .mapNotNull { app ->
                 try {
@@ -178,7 +185,7 @@ class PrimerFragment : Fragment() {
 
     inner class AppsAdapter(
         private val apps: List<AppInfo>,
-        private val onItemClick: (AppInfo) -> Unit,
+        private val onItemClick: (AppInfo) -> Unit,  // Mantenemos el parámetro pero no lo usaremos
         private val onSwitchChanged: (String, Boolean) -> Unit
     ) : RecyclerView.Adapter<AppsAdapter.AppViewHolder>() {
 
@@ -198,7 +205,7 @@ class PrimerFragment : Fragment() {
                 installDate.text = "Instalado: ${app.installDate}"
 
                 // Configurar todos los textos en negro
-                val textColor = Color.BLACK
+                val textColor = Color.WHITE
                 appName.setTextColor(textColor)
                 packageName.setTextColor(textColor)
                 appVersion.setTextColor(textColor)
@@ -207,10 +214,8 @@ class PrimerFragment : Fragment() {
                 // Configurar el estado del switch (sin activar listener)
                 appSwitch.isChecked = app.isSelected
 
-                // Configurar los listeners
-                itemView.setOnClickListener { onItemClick(app) }
-
-                // Listener para el switch
+                // Ya no configuramos el onClickListener para el itemView
+                // Solo dejamos el listener para el switch
                 appSwitch.setOnCheckedChangeListener { _, isChecked ->
                     onSwitchChanged(app.packageName, isChecked)
                 }
