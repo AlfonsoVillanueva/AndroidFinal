@@ -38,6 +38,7 @@ android {
 dependencies {
 
     implementation("androidx.fragment:fragment-ktx:1.8.6")
+    implementation("com.github.bumptech.glide:glide:4.16.0")
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
