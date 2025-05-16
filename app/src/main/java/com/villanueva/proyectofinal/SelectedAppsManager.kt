@@ -2,51 +2,60 @@ package com.villanueva.proyectofinal
 
 import android.content.Context
 import android.content.SharedPreferences
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 
 /**
  * Clase de utilidad para manejar las aplicaciones seleccionadas
  * Puedes usar esta clase desde cualquier parte de tu aplicación
  */
+
 object SelectedAppsManager {
     private const val PREFS_NAME = "AppSelectionPrefs"
-    private const val SELECTED_APPS_KEY = "selectedApps"
+    private const val SELECTED_APPS_KEY = "selectedAppsData"
 
-    /**
-     * Obtiene la lista de paquetes de aplicaciones seleccionadas
-     */
-    fun getSelectedApps(context: Context): Set<String> {
-        val prefs: SharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-        return prefs.getStringSet(SELECTED_APPS_KEY, setOf()) ?: setOf()
+    private val gson = Gson()
+
+    private val type = object : TypeToken<MutableList<BlockedAppData>>() {}.type
+
+    fun getSelectedAppDataList(context: Context): List<BlockedAppData> {
+        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        val json = prefs.getString(SELECTED_APPS_KEY, null)
+        return if (json != null) {
+            gson.fromJson<MutableList<BlockedAppData>>(json, type).toList() // devolver copia inmutable
+        } else {
+            emptyList()
+        }
     }
 
-    /**
-     * Guarda una aplicación como seleccionada
-     */
+    // Agregar o eliminar paquete individualmente
     fun saveAppSelection(context: Context, packageName: String, isSelected: Boolean) {
-        val prefs: SharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-        val selectedApps = getSelectedApps(context).toMutableSet()
+        val appList = getSelectedAppDataList(context).toMutableList()
 
         if (isSelected) {
-            selectedApps.add(packageName)
+            if (appList.none { it.packageName == packageName }) {
+                appList.add(BlockedAppData(packageName))
+            }
         } else {
-            selectedApps.remove(packageName)
+            appList.removeAll { it.packageName == packageName }
         }
 
-        prefs.edit().putStringSet(SELECTED_APPS_KEY, selectedApps).apply()
+        saveAppDataList(context, appList)
     }
 
-    /**
-     * Verifica si una aplicación está seleccionada
-     */
+    // Guardar lista completa (usado internamente)
+    fun saveAppDataList(context: Context, appList: List<BlockedAppData>) {
+        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        val json = gson.toJson(appList)
+        prefs.edit().putString(SELECTED_APPS_KEY, json).apply()
+    }
+
     fun isAppSelected(context: Context, packageName: String): Boolean {
-        return getSelectedApps(context).contains(packageName)
+        return getSelectedAppDataList(context).any { it.packageName == packageName }
     }
 
-    /**
-     * Elimina todas las selecciones (reset)
-     */
     fun clearAllSelections(context: Context) {
-        val prefs: SharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-        prefs.edit().putStringSet(SELECTED_APPS_KEY, setOf()).apply()
+        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        prefs.edit().remove(SELECTED_APPS_KEY).apply()
     }
 }

@@ -150,15 +150,8 @@ class PrimerFragment : Fragment() {
 
     // Guardar la selección de una app
     private fun saveAppSelection(packageName: String, isSelected: Boolean) {
-        val selectedApps = getSelectedApps().toMutableSet()
-
-        if (isSelected) {
-            selectedApps.add(packageName)
-        } else {
-            selectedApps.remove(packageName)
-        }
-
-        preferences.edit().putStringSet(SELECTED_APPS_KEY, selectedApps).apply()
+        // Usamos directamente la función del manager que agrega o elimina la app
+        SelectedAppsManager.saveAppSelection(requireContext(), packageName, isSelected)
 
         // Notificar al usuario sobre el cambio (opcional)
         val status = if (isSelected) "activada" else "desactivada"
@@ -171,7 +164,8 @@ class PrimerFragment : Fragment() {
 
     // Obtener la lista de apps seleccionadas
     private fun getSelectedApps(): Set<String> {
-        return preferences.getStringSet(SELECTED_APPS_KEY, setOf()) ?: setOf()
+        val blockedAppsData = SelectedAppsManager.getSelectedAppDataList(requireContext())
+        return blockedAppsData.map { it.packageName }.toSet()
     }
 
     data class AppInfo(
