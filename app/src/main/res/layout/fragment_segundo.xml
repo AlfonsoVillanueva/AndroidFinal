@@ -6,12 +6,44 @@
     android:background="@color/gray_900"
     tools:context=".SegundoFragment">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="25sp"
-        android:textColor="@color/black"
-        android:layout_gravity="center"
-        android:text="Fragment 2" />
+    <!-- Contenedor principal con margen inferior para el menú de navegación -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:paddingBottom="72dp"> <!-- Deja espacio para el BottomNavigationView -->
+
+        <!-- Encabezado del fragmento - Cambiará dinámicamente -->
+        <TextView
+            android:id="@+id/tvHeader"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="25sp"
+            android:textColor="@color/white"
+            android:gravity="center"
+            android:padding="16dp"
+            android:text="Actualmente no se encuentra ninguna app" />
+
+        <!-- Mensaje de estado vacío -->
+        <TextView
+            android:id="@+id/tvEmptyState"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="18sp"
+            android:textColor="@color/white"
+            android:gravity="center"
+            android:padding="32dp"
+            android:text="No has seleccionado ninguna aplicación para monitorear"
+            android:visibility="gone" />
+
+        <!-- Lista de aplicaciones seleccionadas -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/selectedAppsRecyclerView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clipToPadding="false"
+            android:padding="8dp"
+            android:scrollbars="vertical" />
+    </LinearLayout>
 
 </FrameLayout>
