@@ -1,7 +1,6 @@
 package com.villanueva.proyectofinal
 
 import android.content.Context
-import android.content.SharedPreferences
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 
@@ -21,12 +20,27 @@ object SelectedAppsManager {
     fun getSelectedAppDataList(context: Context): List<BlockedAppData> {
         val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         val json = prefs.getString(SELECTED_APPS_KEY, null)
-        return if (json != null) {
-            gson.fromJson<MutableList<BlockedAppData>>(json, type).toList() // devolver copia inmutable
+        val list = if (json != null) {
+            gson.fromJson<MutableList<BlockedAppData>>(json, type).toList()
         } else {
             emptyList()
         }
+
+        return list.map {
+            if (it.isBlocked && System.currentTimeMillis() >= it.unblockAtTimestamp) {
+                it.copy(
+                    isBlocked = false,
+                    unblockAtTimestamp = 0L,
+                    usageTimeAccumulated = 0L,
+                    lastForegroundTimestamp = 0L,
+                    lastBlockStatusChangeTimestamp = System.currentTimeMillis()
+                )
+            } else {
+                it // Mantener los datos intactos si aún está en uso o no está bloqueada
+            }
+        }
     }
+
 
     // Agregar o eliminar paquete individualmente
     fun saveAppSelection(context: Context, packageName: String, isSelected: Boolean) {

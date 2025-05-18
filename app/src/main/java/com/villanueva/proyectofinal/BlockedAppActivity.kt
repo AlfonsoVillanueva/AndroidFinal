@@ -3,6 +3,7 @@ package com.villanueva.proyectofinal
 import android.content.Intent
 import android.os.Bundle
 import android.os.CountDownTimer
+import android.util.Log
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
@@ -64,6 +65,29 @@ class BlockedAppActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
+        // Asegúrate de marcar que la pantalla de bloqueo ya no está visible
+        AppBlockerService.setBlockedActivityVisible(false)
         countDownTimer?.cancel()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        AppBlockerService.setBlockedActivityVisible(false)
+    }
+
+    override fun onPause() {
+        super.onPause()
+        AppBlockerService.setBlockedActivityVisible(false)
+        Log.d("TAG","estoy en on pause")
+    }
+
+    override fun onResume() {
+        super.onResume()
+        AppBlockerService.setBlockedActivityVisible(true)
+    }
+
+    override fun onUserLeaveHint() {
+        super.onUserLeaveHint()
+        AppBlockerService.setBlockedActivityVisible(false)  // Informa al servicio que ya no está visible
     }
 }
