@@ -6,7 +6,7 @@ import android.content.Intent
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
-import android.widget.Toast
+import com.google.gson.Gson
 
 class AppBlockerService : AccessibilityService() {
     private var blockedActivityVisible = false
@@ -125,6 +125,8 @@ class AppBlockerService : AccessibilityService() {
             if (updated) {
                 SelectedAppsManager.saveAppDataList(this, blockedAppsData)
                 Log.d("AppBlockerService", "Lista de apps bloqueadas actualizada guardada.")
+
+                broadcastBlockedApps(blockedAppsData)
             }
 
         }
@@ -162,6 +164,18 @@ class AppBlockerService : AccessibilityService() {
     override fun onInterrupt() {
         // Aquí puedes manejar interrupciones del servicio si lo deseas
     }
+
+
+    private fun broadcastBlockedApps(blockedAppsData1: MutableList<BlockedAppData>) {
+        val blockedAppsData = SelectedAppsManager.getSelectedAppDataList(this).toMutableList()
+        val gson = Gson()
+        val json = gson.toJson(blockedAppsData)
+
+        val intent = Intent("com.villanueva.proyectofinal.BLOCKED_APPS_UPDATE")
+        intent.putExtra("blockedAppsJson", json)
+        sendBroadcast(intent)
+    }
+
 
     companion object {
         private var blockedActivityVisible = false

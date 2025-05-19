@@ -1,6 +1,8 @@
 package com.villanueva.proyectofinal
 
 import android.content.Context
+import android.graphics.drawable.Drawable
+import androidx.core.content.ContextCompat
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 
@@ -26,9 +28,24 @@ object SelectedAppsManager {
             emptyList()
         }
 
+        val packageManager = context.packageManager
+
         return list.map {
-            if (it.isBlocked && System.currentTimeMillis() >= it.unblockAtTimestamp) {
-                it.copy(
+            var appName: String
+            var appIcon: Drawable?
+            try {
+                val applicationInfo = packageManager.getApplicationInfo(it.packageName, 0)
+                appName = packageManager.getApplicationLabel(applicationInfo).toString()
+                appIcon = packageManager.getApplicationIcon(applicationInfo)
+            } catch (e: Exception) {
+                appName = it.packageName
+                appIcon = ContextCompat.getDrawable(context, android.R.drawable.sym_def_app_icon)
+            }
+
+            val updatedApp = it.copy(AppName = appName, icon = appIcon!!)
+
+            if (updatedApp.isBlocked && System.currentTimeMillis() >= updatedApp.unblockAtTimestamp) {
+                updatedApp.copy(
                     isBlocked = false,
                     unblockAtTimestamp = 0L,
                     usageTimeAccumulated = 0L,
@@ -36,7 +53,7 @@ object SelectedAppsManager {
                     lastBlockStatusChangeTimestamp = System.currentTimeMillis()
                 )
             } else {
-                it // Mantener los datos intactos si aún está en uso o no está bloqueada
+                updatedApp
             }
         }
     }
@@ -45,10 +62,25 @@ object SelectedAppsManager {
     // Agregar o eliminar paquete individualmente
     fun saveAppSelection(context: Context, packageName: String, isSelected: Boolean) {
         val appList = getSelectedAppDataList(context).toMutableList()
+        val packageManager = context.packageManager
 
         if (isSelected) {
             if (appList.none { it.packageName == packageName }) {
-                appList.add(BlockedAppData(packageName))
+                val appName = try {
+                    val applicationInfo = packageManager.getApplicationInfo(packageName, 0)
+                    packageManager.getApplicationLabel(applicationInfo).toString()
+                } catch (e: Exception) {
+                    packageName // fallback en caso de error
+                }
+
+                val appIcon = try {
+                    val applicationInfo = packageManager.getApplicationInfo(packageName, 0)
+                    packageManager.getApplicationIcon(applicationInfo)
+                } catch (e: Exception) {
+                    androidx.core.content.ContextCompat.getDrawable(context, android.R.drawable.sym_def_app_icon)!!
+                }
+
+                appList.add(BlockedAppData(packageName = packageName, AppName = appName, icon = appIcon))
             }
         } else {
             appList.removeAll { it.packageName == packageName }

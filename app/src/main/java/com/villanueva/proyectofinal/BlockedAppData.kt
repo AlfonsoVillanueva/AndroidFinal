@@ -1,8 +1,12 @@
 package com.villanueva.proyectofinal
 
+import android.graphics.drawable.Drawable
 import java.util.concurrent.TimeUnit
 
 data class BlockedAppData(
+    val AppName: String,
+    val icon: Drawable,
+
     val packageName: String,
     var isBlocked: Boolean = false,
 
@@ -28,6 +32,15 @@ data class BlockedAppData(
         }
     }
 
+    fun getRemainingUsageTime(): Long {
+        //tiempo en milisegundos
+        return usageLimit - usageTimeAccumulated
+    }
+
+    fun getRemainingBlockTime(currentTime: Long): Long {
+        //tiempo en milisegundos
+        return if (isBlocked) unblockAtTimestamp - currentTime else 0L
+    }
 
     companion object {
         val usageLimit = TimeUnit.MINUTES.toMillis(1)      // Tiempo permitido
