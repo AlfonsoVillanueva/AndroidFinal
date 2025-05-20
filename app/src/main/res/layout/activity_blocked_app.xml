@@ -7,34 +7,50 @@
     android:orientation="vertical"
     android:padding="20dp">
 
+    <!-- Contenedor del GIF centrado horizontalmente -->
     <androidx.cardview.widget.CardView
-        android:layout_width="match_parent"
-        android:layout_height="275dp"
+        android:layout_width="330dp"
+        android:layout_height="250dp"
+        android:layout_gravity="center_horizontal"
         android:background="@color/black">
 
         <ImageView
             android:id="@+id/gif2imageView"
             android:layout_width="wrap_content"
             android:layout_height="275dp"
-            app:srcCompat="@drawable/gato" />
-
+            android:scaleType="fitXY" />
     </androidx.cardview.widget.CardView>
 
+    <!-- Ícono debajo del GIF -->
+    <ImageView
+        android:id="@+id/lockIcon"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_gravity="top|center_horizontal"
+        android:layout_marginTop="270dp"
+        android:src="@drawable/ic_cerrar"
+        android:tint="@color/white" />
+
+    <!-- Contenedor inferior -->
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="331dp"
         android:layout_gravity="bottom|clip_horizontal"
         android:background="@color/black">
 
+        <!-- Texto principal -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="118dp"
+            android:layout_gravity="top|center_horizontal"
+            android:layout_marginTop="32dp"
             android:paddingBottom="20dp"
-            android:text="🚫 Esta aplicación está bloqueada"
+            android:text="Esta aplicación está bloqueada"
             android:textAlignment="center"
             android:textColor="#FFFFFF"
             android:textSize="28sp" />
 
+        <!-- Temporizador -->
         <TextView
             android:id="@+id/tv_Time"
             android:layout_width="match_parent"
@@ -45,6 +61,7 @@
             android:textColor="@color/white"
             android:textSize="20sp" />
 
+        <!-- Botón inferior -->
         <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="84dp"
@@ -56,9 +73,11 @@
                 android:layout_height="58dp"
                 android:layout_gravity="center_horizontal"
                 android:text="Volver al inicio"
-                android:textSize="20sp" />
+                android:textSize="20sp"
+                android:textColor="@color/white"
+                android:backgroundTint="@color/gray_900" />
         </FrameLayout>
-
     </FrameLayout>
-
 </FrameLayout>
+
+

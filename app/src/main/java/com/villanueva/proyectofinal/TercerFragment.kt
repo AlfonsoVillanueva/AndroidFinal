@@ -38,10 +38,10 @@ class TercerFragment : Fragment() {
 
         val imageView = view.findViewById<ImageView>(R.id.gifImageView)
 
-// Cargar el GIF con Glide
+// Cargar el GIF
         Glide.with(this)
             .asGif()
-            .load(R.drawable.gato) // Reemplaza "tu_gif" con el nombre del archivo .gif en res/drawable
+            .load(R.drawable.gato)
             .into(imageView)
 
 

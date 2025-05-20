@@ -3,7 +3,7 @@
 
     <item
         android:id="@+id/itemFrament1"
-        android:icon="@drawable/ic_fragment"
+        android:icon="@drawable/ic_barra"
         android:title="Block Apps"
 
         />
@@ -11,7 +11,7 @@
 
     <item
         android:id="@+id/itemFrament3"
-        android:icon="@drawable/ic_fragment"
+        android:icon="@drawable/ic_barra"
         android:title="Stats"
 
         />

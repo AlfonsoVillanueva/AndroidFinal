@@ -23,7 +23,7 @@ class BlockedAppActivity : AppCompatActivity() {
         val imageView = findViewById<ImageView>(R.id.gif2imageView)
         Glide.with(this)
             .asGif()
-            .load(R.drawable.gato)
+            .load(R.drawable.gato_triste)
             .into(imageView)
 
         timeRemainingTextView = findViewById(R.id.tv_Time)

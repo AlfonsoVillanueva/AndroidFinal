@@ -7,7 +7,7 @@
     android:background="@color/gray_900"
     tools:context=".TercerFragment">
 
-    <!-- Recuadro con el GIF encima -->
+    <!-- GIF -->
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="270dp"
@@ -27,7 +27,7 @@
         android:id="@+id/tituloTopApps"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Aplicaciones más usadas"
+        android:text="Aplicaciones más usadas:"
         android:textSize="18sp"
         android:textStyle="bold"
         android:textColor="@color/white"
@@ -35,7 +35,7 @@
         android:layout_marginStart="16dp"
         android:layout_marginEnd="16dp" />
 
-    <!-- RecyclerView que ocupará el resto del espacio -->
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/appsRecyclerView"
         android:layout_width="match_parent"
