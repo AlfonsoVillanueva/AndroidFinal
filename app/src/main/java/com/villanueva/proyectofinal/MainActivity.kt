@@ -33,14 +33,6 @@ class MainActivity : AppCompatActivity() {
                 return@OnNavigationItemSelectedListener true
             }
 
-            R.id.itemFrament2 -> {
-                supportFragmentManager.commit {
-                    replace<SegundoFragment>(R.id.frameContainer)
-                    setReorderingAllowed(true)
-                    addToBackStack("replacement")
-                }
-                return@OnNavigationItemSelectedListener true
-            }
 
             R.id.itemFrament3 -> {
                 supportFragmentManager.commit {
