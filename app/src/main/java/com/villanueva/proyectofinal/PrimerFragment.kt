@@ -175,6 +175,7 @@ class PrimerFragment : Fragment() {
         val versionName: String,
         val installDate: String,
         val isSelected: Boolean = false
+        //sduihsdiujhfuhjsdhgfjsd
     )
 
     inner class AppsAdapter(
